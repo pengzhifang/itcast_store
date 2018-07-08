@@ -10,9 +10,9 @@
           <el-input v-model="formData.username"></el-input>
         </el-form-item>
         <el-form-item label="密码">
-          <el-input v-model="formData.password"></el-input>
+          <el-input type="password" v-model="formData.password"></el-input>
         </el-form-item>
-        <el-button class="login-btn" type="primary">登录</el-button>
+        <el-button class="login-btn" type="primary" @click="handleLogin">登录</el-button>
       </el-form>
    </div>
 </template>
@@ -26,6 +26,21 @@ export default {
         password: ''
       }
     };
+  },
+  methods: {
+    async handleLogin() {
+      const res = await this.$http.post('login', this.formData);
+      console.log(res);
+      const data = res.data;
+      const {meta: {status, msg}} = data;
+      if (status === 200) {
+        this.$message.success(msg);
+        const {data: {token}} = data;
+        sessionStorage.setItem('token', token);
+      } else {
+        this.$message.error(msg);
+      }
+    }
   }
 };
 </script>
