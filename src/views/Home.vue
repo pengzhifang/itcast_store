@@ -90,7 +90,13 @@
 
 <script>
 export default {
-
+  beforeCreate() {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      this.$router.push({name: 'login'});
+      this.$message.warning('请先登录!');
+    }
+  }
 };
 </script>
 
@@ -102,6 +108,7 @@ export default {
   background-color: #b3c0d1;
   height: 60px;
   line-height: 60px;
+  padding-left: 0;
 }
 .header h2 {
   text-align: center;

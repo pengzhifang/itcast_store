@@ -30,13 +30,14 @@ export default {
   methods: {
     async handleLogin() {
       const res = await this.$http.post('login', this.formData);
-      console.log(res);
+      // console.log(res);
       const data = res.data;
       const {meta: {status, msg}} = data;
       if (status === 200) {
         this.$message.success(msg);
         const {data: {token}} = data;
         sessionStorage.setItem('token', token);
+        this.$router.push({name: 'home'});
       } else {
         this.$message.error(msg);
       }
