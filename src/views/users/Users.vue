@@ -82,7 +82,7 @@
       label="操作">
         <template slot-scope="scope">
           <el-button plain size="mini" type="primary" icon="el-icon-edit"></el-button>
-          <el-button plain size="mini" type="danger" icon="el-icon-delete"></el-button>
+          <el-button plain size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.row.id)"></el-button>
           <el-button plain size="mini" type="warning" icon="el-icon-check"></el-button>
         </template>
       </el-table-column>
@@ -139,6 +139,33 @@ export default {
         this.loadData();
         this.form = {};
       }
+    },
+    async handleDelete(id) {
+      // console.log(id);
+      this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$http
+          .delete(`users/${id}`)
+          .then((res) => {
+            console.log(res);
+            const {meta: {msg, status}} = res.data;
+            if (status === 200) {
+              this.$message({
+                type: 'success',
+                message: msg
+              });
+              this.loadData();
+            }
+          });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });
+      });
     }
   }
 };
