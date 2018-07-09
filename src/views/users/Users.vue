@@ -10,7 +10,30 @@
         <el-input class="searchInput" clearable placeholder="请输入内容">
           <el-button slot="append" icon="el-icon-search"></el-button>
         </el-input>
-        <el-button type="success" plain>添加用户</el-button>
+        <el-button type="success" plain @click="formdataVisible = true">添加用户</el-button>
+        <!-- 点击添加的弹出层 -->
+        <el-dialog
+          title="添加用户"
+          :visible.sync="formdataVisible">
+          <el-form :model="form" label-width="120px" label-position="right">
+            <el-form-item label="用户名">
+              <el-input v-model="form.username"></el-input>
+            </el-form-item>
+            <el-form-item label="密码">
+              <el-input v-model="form.password"></el-input>
+            </el-form-item>
+            <el-form-item label="邮箱">
+              <el-input v-model="form.email"></el-input>
+            </el-form-item>
+            <el-form-item label="电话">
+              <el-input v-model="form.mobile"></el-input>
+            </el-form-item>
+          </el-form>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="formdataVisible = false">取 消</el-button>
+            <el-button type="primary" @click="handleAdd">确 定</el-button>
+          </span>
+        </el-dialog>
       </el-col>
     </el-row>
     <el-table
@@ -72,7 +95,14 @@ export default {
   data() {
     return {
       list: [],
-      isLoading: true
+      isLoading: true,
+      formdataVisible: false,
+      form: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      }
     };
   },
   created() {
@@ -84,7 +114,7 @@ export default {
       const token = sessionStorage.getItem('token');
       // 在请求头中设置token
       this.$http.defaults.headers.common['Authorization'] = token;
-      const res = await this.$http.get('/users?pagenum=1&pagesize=10');
+      const res = await this.$http.get('users?pagenum=1&pagesize=10');
       // console.log(res);
       this.isLoading = false;
       const data = res.data;
@@ -96,6 +126,18 @@ export default {
         } else {
           this.$message.error(msg);
         }
+      }
+    },
+    async handleAdd () {
+      this.formdataVisible = false;
+      // console.log(this.form);
+      const res = await this.$http.post('users', this.form);
+      // console.log(res);
+      const {meta: {status, msg}} = res.data;
+      if (status === 201) {
+        this.$message.success(msg);
+        this.loadData();
+        this.form = {};
       }
     }
   }
