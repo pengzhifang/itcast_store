@@ -16,6 +16,7 @@
     <el-table
       stripe
       border
+      v-loading="isLoading"
       :data="list"
       style="width: 100%">
       <el-table-column
@@ -70,7 +71,8 @@
 export default {
   data() {
     return {
-      list: []
+      list: [],
+      isLoading: true
     };
   },
   created() {
@@ -83,7 +85,8 @@ export default {
       // 在请求头中设置token
       this.$http.defaults.headers.common['Authorization'] = token;
       const res = await this.$http.get('/users?pagenum=1&pagesize=10');
-      console.log(res);
+      // console.log(res);
+      this.isLoading = false;
       const data = res.data;
       const {meta: {msg, status}} = data;
       if (status === 200) {
