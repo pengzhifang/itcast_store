@@ -99,7 +99,7 @@
             </el-form-item>
           </el-form>
           <span slot="footer" class="dialog-footer">
-            <el-button @click="editdataVisible = false">取 消</el-button>
+            <el-button @click="cancleEdit">取 消</el-button>
             <el-button type="primary" @click="sureEdit(scope.row.id)">确 定</el-button>
           </span>
         </el-dialog>
@@ -216,9 +216,14 @@ export default {
       if (status === 200) {
         this.loadData();
         this.$message.success(msg);
+        this.form = {};
       } else {
         this.$message.error(msg);
       }
+    },
+    async cancleEdit() {
+      this.editdataVisible = false;
+      this.form = {};
     }
   }
 };
