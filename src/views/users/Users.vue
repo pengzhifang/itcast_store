@@ -74,14 +74,35 @@
           <el-switch
             v-model="scope.row.mg_state"
             active-color="#13ce66"
-            inactive-color="#ff4949">
+            inactive-color="#ff4949"
+            @change="handleState(scope.row.id, scope.row.mg_state)">
           </el-switch>
         </template>
       </el-table-column>
       <el-table-column
       label="操作">
         <template slot-scope="scope">
-          <el-button plain size="mini" type="primary" icon="el-icon-edit"></el-button>
+          <el-button plain size="mini" type="primary" icon="el-icon-edit" @click="handleEdit(scope.row.id)"></el-button>
+          <!-- 点击修改用户弹出层 -->
+          <el-dialog
+          title="修改用户"
+          :visible.sync="editdataVisible">
+          <el-form :model="form" label-width="120px" label-position="right">
+            <el-form-item label="用户名">
+              <el-input v-model="form.username"></el-input>
+            </el-form-item>
+            <el-form-item label="邮箱">
+              <el-input v-model="form.email"></el-input>
+            </el-form-item>
+            <el-form-item label="电话">
+              <el-input v-model="form.mobile"></el-input>
+            </el-form-item>
+          </el-form>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="editdataVisible = false">取 消</el-button>
+            <el-button type="primary" @click="sureEdit(scope.row.id)">确 定</el-button>
+          </span>
+        </el-dialog>
           <el-button plain size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.row.id)"></el-button>
           <el-button plain size="mini" type="warning" icon="el-icon-check"></el-button>
         </template>
@@ -97,6 +118,7 @@ export default {
       list: [],
       isLoading: true,
       formdataVisible: false,
+      editdataVisible: false,
       form: {
         username: '',
         password: '',
@@ -140,7 +162,7 @@ export default {
         this.form = {};
       }
     },
-    async handleDelete(id) {
+    handleDelete(id) {
       // console.log(id);
       this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
         confirmButtonText: '确定',
@@ -166,6 +188,37 @@ export default {
           message: '已取消删除'
         });
       });
+    },
+    async handleState(id, state) {
+      const res = await this.$http.put(`users/${id}/state/${state}`, {uId: id, type: state});
+      // console.log(res);
+      const {meta: {msg, status}} = res.data;
+      if (status === 200) {
+        this.$message.success(msg);
+      } else {
+        this.$message.error(msg);
+      }
+    },
+    async handleEdit(id) {
+      this.editdataVisible = true;
+      const res = await this.$http.get(`users/${id}`);
+      // console.log(res);
+      const {meta: {status}, data} = res.data;
+      if (status === 200) {
+        this.form = data;
+      }
+    },
+    async sureEdit(id) {
+      this.editdataVisible = false;
+      const res = await this.$http.put(`users/${id}`, this.form);
+      // console.log(res);
+      const {meta: {msg, status}} = res.data;
+      if (status === 200) {
+        this.loadData();
+        this.$message.success(msg);
+      } else {
+        this.$message.error(msg);
+      }
     }
   }
 };
