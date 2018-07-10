@@ -17,11 +17,11 @@
         <el-dialog
           title="添加用户"
           :visible.sync="formdataVisible">
-          <el-form :model="form" label-width="120px" label-position="right">
-            <el-form-item label="用户名">
+          <el-form :model="form" :rules="formRules" label-width="120px" label-position="right" ref="ruleForm">
+            <el-form-item label="用户名" prop="username">
               <el-input v-model="form.username"></el-input>
             </el-form-item>
-            <el-form-item label="密码">
+            <el-form-item label="密码" prop="password">
               <el-input type="password" v-model="form.password"></el-input>
             </el-form-item>
             <el-form-item label="邮箱">
@@ -144,7 +144,17 @@ export default {
       // 每页多少条数据
       pagesize: 4,
       // 总条数
-      total: 0
+      total: 0,
+      formRules: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 1, max: 6, message: '长度在 1 到 6 个字符', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 3, max: 6, message: '长度在 3 到 6 个字符', trigger: 'blur' }
+        ]
+      }
     };
   },
   created() {
@@ -185,20 +195,26 @@ export default {
       this.loadData();
     },
     async handleAdd () {
-      this.formdataVisible = false;
-      // console.log(this.form);
-      const res = await this.$http.post('users', this.form);
-      // console.log(res);
-      const {meta: {status, msg}} = res.data;
-      if (status === 201) {
-        this.$message.success(msg);
-        this.loadData();
-        // 清空文本框
-        // this.form = {};
-        for (let key in this.form) {
-          this.form[key] = '';
+      this.$refs.ruleForm.validate(async (valid) => {
+        if (!valid) {
+          return this.$message.error('请输入完整数据');
+        } else {
+          this.formdataVisible = false;
+          // console.log(this.form);
+          const res = await this.$http.post('users', this.form);
+          // console.log(res);
+          const {meta: {status, msg}} = res.data;
+          if (status === 201) {
+            this.$message.success(msg);
+            this.loadData();
+            // 清空文本框
+            // this.form = {};
+            for (let key in this.form) {
+              this.form[key] = '';
+            }
+          }
         }
-      }
+      });
     },
     async handleDelete(id) {
       // console.log(id);
