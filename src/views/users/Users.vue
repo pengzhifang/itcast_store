@@ -193,7 +193,11 @@ export default {
       if (status === 201) {
         this.$message.success(msg);
         this.loadData();
-        this.form = {};
+        // 清空文本框
+        // this.form = {};
+        for (let key in this.form) {
+          this.form[key] = '';
+        }
       }
     },
     async handleDelete(id) {
@@ -249,14 +253,18 @@ export default {
       if (status === 200) {
         this.loadData();
         this.$message.success(msg);
-        this.form = {};
+        for (let key in this.form) {
+          this.form[key] = '';
+        }
       } else {
         this.$message.error(msg);
       }
     },
     async cancleEdit() {
       this.editdataVisible = false;
-      this.form = {};
+      for (let key in this.form) {
+        this.form[key] = '';
+      }
     }
   }
 };
