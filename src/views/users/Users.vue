@@ -1,5 +1,6 @@
 <template>
   <el-card class="box-card">
+    <!-- 面包屑 -->
     <el-breadcrumb separator-class="el-icon-arrow-right" class="bread">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
@@ -7,8 +8,9 @@
     </el-breadcrumb>
     <el-row class="searchArea">
       <el-col :span="24">
-        <el-input class="searchInput" clearable placeholder="请输入内容">
-          <el-button slot="append" icon="el-icon-search"></el-button>
+        <!-- 搜索框 -->
+        <el-input v-model="searchValue" class="searchInput" clearable placeholder="请输入内容">
+          <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
         </el-input>
         <el-button type="success" plain @click="formdataVisible = true">添加用户</el-button>
         <!-- 点击添加的弹出层 -->
@@ -20,7 +22,7 @@
               <el-input v-model="form.username"></el-input>
             </el-form-item>
             <el-form-item label="密码">
-              <el-input v-model="form.password"></el-input>
+              <el-input type="password" v-model="form.password"></el-input>
             </el-form-item>
             <el-form-item label="邮箱">
               <el-input v-model="form.email"></el-input>
@@ -36,6 +38,7 @@
         </el-dialog>
       </el-col>
     </el-row>
+    <!-- 表格 -->
     <el-table
       stripe
       border
@@ -108,6 +111,7 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页 -->
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
@@ -125,6 +129,7 @@ export default {
   data() {
     return {
       list: [],
+      searchValue: '',
       isLoading: true,
       formdataVisible: false,
       editdataVisible: false,
@@ -161,7 +166,7 @@ export default {
       const token = sessionStorage.getItem('token');
       // 在请求头中设置token
       this.$http.defaults.headers.common['Authorization'] = token;
-      const res = await this.$http.get(`users?pagenum=${this.pagenum}&pagesize=${this.pagesize}`);
+      const res = await this.$http.get(`users?pagenum=${this.pagenum}&pagesize=${this.pagesize}&query=${this.searchValue}`);
       // console.log(res);
       this.isLoading = false;
       const data = res.data;
@@ -175,6 +180,9 @@ export default {
           this.$message.error(msg);
         }
       }
+    },
+    handleSearch() {
+      this.loadData();
     },
     async handleAdd () {
       this.formdataVisible = false;
