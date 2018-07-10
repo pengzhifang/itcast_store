@@ -66,7 +66,7 @@
         <template slot-scope="scope">
           <el-button plain size="mini" type="primary" icon="el-icon-edit" @click="handleEdit(scope.row)"></el-button>
           <el-button plain size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.row.id)"></el-button>
-          <el-button plain size="mini" type="warning" icon="el-icon-check"></el-button>
+          <el-button plain size="mini" type="warning" icon="el-icon-check" @click="handleShowRoles(scope.row)"></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -123,6 +123,30 @@
         <el-button type="primary" @click="sureEdit(scope.row.id)">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 分配角色 -->
+    <el-dialog
+      title="分配角色"
+      :visible.sync="setRolesVisible" @closed="handleClosed">
+      <el-form :model="form" label-width="120px" label-position="right">
+        <el-form-item label="当前用户">
+          {{ currentUsername }}
+        </el-form-item>
+        <el-form-item label="请选择角色">
+          <el-select v-model="currentRoleId" placeholder="请选择">
+            <el-option :value="-1" disabled label="请选择"></el-option>
+            <el-option
+            v-for="item in roles"
+            :key="item.id"
+            :value="item.id"
+            :label="item.roleName"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRolesVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleSetRoles">确 定</el-button>
+      </span>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -135,6 +159,7 @@ export default {
       isLoading: true,
       formdataVisible: false,
       editdataVisible: false,
+      setRolesVisible: false,
       // 表单所需数据
       form: {
         username: '',
@@ -157,7 +182,12 @@ export default {
           { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 3, max: 6, message: '长度在 3 到 6 个字符', trigger: 'blur' }
         ]
-      }
+      },
+      // 分配角色所需数据
+      currentUsername: '',
+      currentUserId: -1,
+      currentRoleId: -1,
+      roles: []
     };
   },
   created() {
@@ -295,6 +325,36 @@ export default {
       // 清空文本框
       for (let key in this.form) {
         this.form[key] = '';
+      }
+    },
+    // 显示分配角色弹出框
+    async handleShowRoles(user) {
+      this.currentUserId = user.id;
+      this.setRolesVisible = true;
+      this.currentUsername = user.username;
+      const res = await this.$http.get('roles');
+      console.log(res);
+      const {data} = res.data;
+      this.roles = data;
+      // 获取角色id 通过rid设置当前用户的角色
+      const res1 = await this.$http.get(`users/${user.id}`);
+      this.currentRoleId = res1.data.data.rid;
+      console.log(this.currentRoleId);
+    },
+    // 点击确定分配用户角色
+    async handleSetRoles() {
+      this.setRolesVisible = false;
+      const res = await this.$http.put(`users/${this.currentUserId}/role`, {
+        rid: this.currentRoleId
+      });
+      const {meta: {msg, status}} = res.data;
+      if (status === 200) {
+        this.$message.success(msg);
+        this.currentUsername = '';
+        this.currentUserId = -1;
+        this.currentRoleId = -1;
+      } else {
+        this.$message.error(msg);
       }
     }
   }
