@@ -188,26 +188,25 @@ export default {
         this.form = {};
       }
     },
-    handleDelete(id) {
+    async handleDelete(id) {
       // console.log(id);
       this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
-        this.$http
-          .delete(`users/${id}`)
-          .then((res) => {
-            console.log(res);
-            const {meta: {msg, status}} = res.data;
-            if (status === 200) {
-              this.$message({
-                type: 'success',
-                message: msg
-              });
-              this.loadData();
-            }
+      }).then(async () => {
+        const res = await this.$http.delete(`users/${id}`);
+        const {meta: {msg, status}} = res.data;
+        if (status === 200) {
+          this.$message({
+            type: 'success',
+            message: msg
           });
+          this.pagenum = 1;
+          this.loadData();
+        } else {
+          this.$message.error(msg);
+        }
       }).catch(() => {
         this.$message({
           type: 'info',
