@@ -6,36 +6,15 @@
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
       <el-breadcrumb-item>用户列表</el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- 搜索框和添加按钮 -->
     <el-row class="searchArea">
       <el-col :span="24">
         <!-- 搜索框 -->
         <el-input v-model="searchValue" class="searchInput" clearable placeholder="请输入内容">
           <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
         </el-input>
+        <!-- 添加按钮 -->
         <el-button type="success" plain @click="formdataVisible = true">添加用户</el-button>
-        <!-- 点击添加的弹出层 -->
-        <el-dialog
-          title="添加用户"
-          :visible.sync="formdataVisible" @closed="handleClosed">
-          <el-form :model="form" :rules="formRules" label-width="120px" label-position="right" ref="ruleForm">
-            <el-form-item label="用户名" prop="username">
-              <el-input v-model="form.username"></el-input>
-            </el-form-item>
-            <el-form-item label="密码" prop="password">
-              <el-input type="password" v-model="form.password"></el-input>
-            </el-form-item>
-            <el-form-item label="邮箱">
-              <el-input v-model="form.email"></el-input>
-            </el-form-item>
-            <el-form-item label="电话">
-              <el-input v-model="form.mobile"></el-input>
-            </el-form-item>
-          </el-form>
-          <span slot="footer" class="dialog-footer">
-            <el-button @click="formdataVisible = false">取 消</el-button>
-            <el-button type="primary" @click="handleAdd">确 定</el-button>
-          </span>
-        </el-dialog>
       </el-col>
     </el-row>
     <!-- 表格 -->
@@ -86,26 +65,6 @@
       label="操作">
         <template slot-scope="scope">
           <el-button plain size="mini" type="primary" icon="el-icon-edit" @click="handleEdit(scope.row)"></el-button>
-          <!-- 点击修改用户弹出层 -->
-          <el-dialog
-          title="修改用户"
-          :visible.sync="editdataVisible" @closed="handleClosed">
-          <el-form :model="form" :rules="formRules" label-width="120px" label-position="right">
-            <el-form-item label="用户名" prop="username">
-              <el-input v-model="form.username" disabled></el-input>
-            </el-form-item>
-            <el-form-item label="邮箱">
-              <el-input v-model="form.email"></el-input>
-            </el-form-item>
-            <el-form-item label="电话">
-              <el-input v-model="form.mobile"></el-input>
-            </el-form-item>
-          </el-form>
-          <span slot="footer" class="dialog-footer">
-            <el-button @click="editdataVisible = false">取 消</el-button>
-            <el-button type="primary" @click="sureEdit(scope.row.id)">确 定</el-button>
-          </span>
-        </el-dialog>
           <el-button plain size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.row.id)"></el-button>
           <el-button plain size="mini" type="warning" icon="el-icon-check"></el-button>
         </template>
@@ -121,6 +80,49 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="total">
     </el-pagination>
+    <!-- 点击添加的弹出层 -->
+    <el-dialog
+      title="添加用户"
+      :visible.sync="formdataVisible" @closed="handleClosed">
+      <el-form :model="form" :rules="formRules" label-width="120px" label-position="right" ref="ruleForm">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="form.username"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input type="password" v-model="form.password"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="form.email"></el-input>
+        </el-form-item>
+        <el-form-item label="电话">
+          <el-input v-model="form.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="formdataVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleAdd">确 定</el-button>
+      </span>
+    </el-dialog>
+    <!-- 点击修改用户弹出层 -->
+    <el-dialog
+      title="修改用户"
+      :visible.sync="editdataVisible" @closed="handleClosed">
+      <el-form :model="form" :rules="formRules" label-width="120px" label-position="right">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="form.username" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="form.email"></el-input>
+        </el-form-item>
+        <el-form-item label="电话">
+          <el-input v-model="form.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editdataVisible = false">取 消</el-button>
+        <el-button type="primary" @click="sureEdit(scope.row.id)">确 定</el-button>
+      </span>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -133,6 +135,7 @@ export default {
       isLoading: true,
       formdataVisible: false,
       editdataVisible: false,
+      // 表单所需数据
       form: {
         username: '',
         password: '',
@@ -171,6 +174,7 @@ export default {
       this.loadData();
       console.log(`当前页: ${val}`);
     },
+    // 加载用户列表
     async loadData() {
       // 发送请求之前，获取token
       const token = sessionStorage.getItem('token');
@@ -191,9 +195,11 @@ export default {
         }
       }
     },
+    // 搜索用户
     handleSearch() {
       this.loadData();
     },
+    // 添加用户
     async handleAdd () {
       this.$refs.ruleForm.validate(async (valid) => {
         if (!valid) {
@@ -209,13 +215,14 @@ export default {
             this.loadData();
             // 清空文本框
             // this.form = {};
-            for (let key in this.form) {
-              this.form[key] = '';
-            }
+            // for (let key in this.form) {
+            //   this.form[key] = '';
+            // }
           }
         }
       });
     },
+    // 删除用户
     async handleDelete(id) {
       // console.log(id);
       this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
@@ -242,6 +249,7 @@ export default {
         });
       });
     },
+    // 修改用户状态
     async handleState(id, state) {
       const res = await this.$http.put(`users/${id}/state/${state}`);
       // console.log(res);
@@ -252,6 +260,7 @@ export default {
         this.$message.error(msg);
       }
     },
+    // 点击编辑按钮
     async handleEdit(user) {
       this.editdataVisible = true;
       // const res = await this.$http.get(`users/${id}`);
@@ -260,11 +269,12 @@ export default {
       // if (status === 200) {
       //   this.form = data;
       // }
-      //直接利用scope.row中的数据显示
+      // 直接利用scope.row中的数据显示
       this.form.username = user.username;
       this.form.email = user.email;
       this.form.mobile = user.mobile;
     },
+    // 确定编辑
     async sureEdit(id) {
       this.editdataVisible = false;
       const res = await this.$http.put(`users/${id}`, this.form);
@@ -280,6 +290,7 @@ export default {
         this.$message.error(msg);
       }
     },
+    // 关闭弹出框
     handleClosed() {
       // 清空文本框
       for (let key in this.form) {
