@@ -53,10 +53,10 @@ export default {
     },
     // 加载用户列表
     async loadData() {
-      // 发送请求之前，获取token
-      const token = sessionStorage.getItem('token');
-      // 在请求头中设置token
-      this.$http.defaults.headers.common['Authorization'] = token;
+      // // 发送请求之前，获取token
+      // const token = sessionStorage.getItem('token');
+      // // 在请求头中设置token
+      // this.$http.defaults.headers.common['Authorization'] = token;
       const res = await this.$http.get(`users?pagenum=${this.pagenum}&pagesize=${this.pagesize}&query=${this.searchValue}`);
       // console.log(res);
       this.isLoading = false;
