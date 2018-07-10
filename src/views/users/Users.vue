@@ -16,7 +16,7 @@
         <!-- 点击添加的弹出层 -->
         <el-dialog
           title="添加用户"
-          :visible.sync="formdataVisible">
+          :visible.sync="formdataVisible" @closed="handleClosed">
           <el-form :model="form" :rules="formRules" label-width="120px" label-position="right" ref="ruleForm">
             <el-form-item label="用户名" prop="username">
               <el-input v-model="form.username"></el-input>
@@ -85,14 +85,14 @@
       <el-table-column
       label="操作">
         <template slot-scope="scope">
-          <el-button plain size="mini" type="primary" icon="el-icon-edit" @click="handleEdit(scope.row.id)"></el-button>
+          <el-button plain size="mini" type="primary" icon="el-icon-edit" @click="handleEdit(scope.row)"></el-button>
           <!-- 点击修改用户弹出层 -->
           <el-dialog
           title="修改用户"
-          :visible.sync="editdataVisible">
-          <el-form :model="form" label-width="120px" label-position="right">
-            <el-form-item label="用户名">
-              <el-input v-model="form.username"></el-input>
+          :visible.sync="editdataVisible" @closed="handleClosed">
+          <el-form :model="form" :rules="formRules" label-width="120px" label-position="right">
+            <el-form-item label="用户名" prop="username">
+              <el-input v-model="form.username" disabled></el-input>
             </el-form-item>
             <el-form-item label="邮箱">
               <el-input v-model="form.email"></el-input>
@@ -102,7 +102,7 @@
             </el-form-item>
           </el-form>
           <span slot="footer" class="dialog-footer">
-            <el-button @click="cancleEdit">取 消</el-button>
+            <el-button @click="editdataVisible = false">取 消</el-button>
             <el-button type="primary" @click="sureEdit(scope.row.id)">确 定</el-button>
           </span>
         </el-dialog>
@@ -252,14 +252,18 @@ export default {
         this.$message.error(msg);
       }
     },
-    async handleEdit(id) {
+    async handleEdit(user) {
       this.editdataVisible = true;
-      const res = await this.$http.get(`users/${id}`);
-      // console.log(res);
-      const {meta: {status}, data} = res.data;
-      if (status === 200) {
-        this.form = data;
-      }
+      // const res = await this.$http.get(`users/${id}`);
+      // // console.log(res);
+      // const {meta: {status}, data} = res.data;
+      // if (status === 200) {
+      //   this.form = data;
+      // }
+      //直接利用scope.row中的数据显示
+      this.form.username = user.username;
+      this.form.email = user.email;
+      this.form.mobile = user.mobile;
     },
     async sureEdit(id) {
       this.editdataVisible = false;
@@ -276,8 +280,8 @@ export default {
         this.$message.error(msg);
       }
     },
-    async cancleEdit() {
-      this.editdataVisible = false;
+    handleClosed() {
+      // 清空文本框
       for (let key in this.form) {
         this.form[key] = '';
       }
