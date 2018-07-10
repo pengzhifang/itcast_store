@@ -108,6 +108,15 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="pagenum"
+      :page-sizes="[2, 4, 6, 8]"
+      :page-size="pagesize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total">
+    </el-pagination>
   </el-card>
 </template>
 
@@ -124,27 +133,44 @@ export default {
         password: '',
         email: '',
         mobile: ''
-      }
+      },
+      // 当前页
+      pagenum: 1,
+      // 每页多少条数据
+      pagesize: 4,
+      // 总条数
+      total: 0
     };
   },
   created() {
     this.loadData();
   },
   methods: {
+    handleSizeChange(val) {
+      this.pagesize = val;
+      this.loadData();
+      console.log(`每页 ${val} 条`);
+    },
+    handleCurrentChange(val) {
+      this.pagenum = val;
+      this.loadData();
+      console.log(`当前页: ${val}`);
+    },
     async loadData() {
       // 发送请求之前，获取token
       const token = sessionStorage.getItem('token');
       // 在请求头中设置token
       this.$http.defaults.headers.common['Authorization'] = token;
-      const res = await this.$http.get('users?pagenum=1&pagesize=10');
+      const res = await this.$http.get(`users?pagenum=${this.pagenum}&pagesize=${this.pagesize}`);
       // console.log(res);
       this.isLoading = false;
       const data = res.data;
       const {meta: {msg, status}} = data;
       if (status === 200) {
-        const {data: {users}} = data;
+        const {data: {users, total}} = data;
         if (status === 200) {
           this.list = users;
+          this.total = total;
         } else {
           this.$message.error(msg);
         }
@@ -190,7 +216,7 @@ export default {
       });
     },
     async handleState(id, state) {
-      const res = await this.$http.put(`users/${id}/state/${state}`, {uId: id, type: state});
+      const res = await this.$http.put(`users/${id}/state/${state}`);
       // console.log(res);
       const {meta: {msg, status}} = res.data;
       if (status === 200) {
