@@ -8,9 +8,14 @@ import 'element-ui/lib/theme-chalk/index.css';
 import '@/assets/css/style.css';
 import MyAxios from './plugins/MyAxios';
 import moment from 'moment';
+import MyBreadcrumb from '@/component/MyBreadcrumb';
 
 Vue.config.productionTip = false;
 
+// 全局组件-面包屑
+Vue.component(MyBreadcrumb.name, MyBreadcrumb);
+
+// 全局过滤器
 Vue.filter('fmtDate', (time, fmtStr) => {
   return moment(time).format(fmtStr);
 });
