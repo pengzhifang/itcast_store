@@ -89,13 +89,14 @@
         :data="treeData"
         show-checkbox
         node-key="id"
+        ref="tree"
         :default-checked-keys="checkedlist"
         default-expand-all
         :props="defaultProps">
       </el-tree>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="handleSetRights">确 定</el-button>
       </span>
     </el-dialog>
   </el-card>
@@ -113,7 +114,8 @@ export default {
         children: 'children',
         label: 'authName'
       },
-      checkedlist: []
+      checkedlist: [],
+      currentRoleId: -1
     };
   },
   created() {
@@ -144,6 +146,7 @@ export default {
     },
     // 显示分配角色权限的事件
     async handleShowRights(role) {
+      this.currentRoleId = role.id;
       this.dialogVisible = true;
       const res = await this.$http.get('rights/tree');
       const {meta: {msg, status}, data} = res.data;
@@ -167,6 +170,26 @@ export default {
         });
       });
       this.checkedlist = array;
+    },
+    // 点击确定按钮分配角色事件
+    async handleSetRights() {
+      this.dialogVisible = false;
+      // 获取当前被选中的节点的id
+      const checkedKeys = this.$refs.tree.getCheckedKeys();
+      // 获取当前半选节点的id
+      const halfCheckedKeys = this.$refs.tree.getHalfCheckedKeys();
+      // console.log(checkedKeys, halfCheckedKeys);
+      const newArray = [...checkedKeys, ...halfCheckedKeys];
+      const res = await this.$http.post(`roles/${this.currentRoleId}/rights`, {
+        rids: newArray.join(',')
+      });
+      const {meta: {msg, status}} = res.data;
+      if (status === 200) {
+        this.loadData();
+        this.$message.success(msg);
+      } else {
+        this.$message.error(msg);
+      }
     }
   }
 };
