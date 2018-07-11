@@ -2,19 +2,24 @@
   <el-card class="box-card">
     <!-- 面包屑 -->
     <my-breadcrumb level1="权限管理" level2="角色列表"></my-breadcrumb>
-
     <!-- 添加角色 -->
     <el-row>
       <el-col :span="24">
         <el-button class="btn">添加角色</el-button>
       </el-col>
     </el-row>
-
     <!-- 表格 -->
     <el-table
-    border
+      v-loading="loading"
+      border
       :data="list"
       style="width: 100%">
+      <!-- 展开列 -->
+      <el-table-column type="expand">
+        <template>
+          <el-tag type="success" closable @close="handleClose">哈哈</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column
       type="index"
       width="50">
@@ -45,21 +50,28 @@
 export default {
   data() {
     return {
-      list: []
+      list: [],
+      loading: true
     };
-  }, 
+  },
   created() {
     this.loadData();
   },
   methods: {
     async loadData() {
+      this.loading = true;
       const res = await this.$http.get('roles');
+      this.loading = false;
       const {meta: {msg, status}, data} = res.data;
       if (status === 200) {
         this.list = data;
       } else {
         this.$message(msg);
       }
+    },
+    // 移除标签事件
+    handleClose() {
+
     }
   }
 };
