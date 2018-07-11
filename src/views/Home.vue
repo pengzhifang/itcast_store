@@ -51,13 +51,13 @@ export default {
       menus: []
     };
   },
-  beforeCreate() {
-    const token = sessionStorage.getItem('token');
-    if (!token) {
-      this.$router.push({name: 'login'});
-      this.$message.warning('请先登录!');
-    }
-  },
+  // beforeCreate() {
+  //   const token = sessionStorage.getItem('token');
+  //   if (!token) {
+  //     this.$router.push({name: 'login'});
+  //     this.$message.warning('请先登录!');
+  //   }
+  // },
   created() {
     this.loadData();
   },

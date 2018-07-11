@@ -5,10 +5,11 @@ import Home from '../views/Home.vue';
 import Users from '../views/users/Users.vue';
 import Rights from '../views/rights/Rights.vue';
 import Roles from '../views/rights/Roles.vue';
+import { Message } from 'element-ui';
 
 Vue.use(Router);
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       name: 'login',
@@ -27,3 +28,24 @@ export default new Router({
     }
   ]
 });
+
+// 路由前置守卫
+router.beforeEach((to, from, next) => {
+  // console.log(to, from);
+  // 判断当前路由是否是login,如果是,直接next()
+  if (to.name === 'login') {
+    next();
+  } else {
+    // 如果不是login则判断是否有token
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      router.push({name: 'login'});
+      Message.warning('请先登录');
+      // return;
+    } else {
+      next();
+    }
+  }
+});
+
+export default router;
