@@ -75,10 +75,28 @@
         <template slot-scope="scope">
           <el-button plain size="mini" type="primary" icon="el-icon-edit"></el-button>
           <el-button plain size="mini" type="danger" icon="el-icon-delete"></el-button>
-          <el-button plain size="mini" type="warning" icon="el-icon-check"></el-button>
+          <el-button plain size="mini" type="warning" icon="el-icon-check" @click="handleShowRoles"></el-button>
         </template>
       </el-table-column>
     </el-table>
+    <!-- 角色授权弹出框 -->
+    <el-dialog
+      title="权限分配"
+      :visible.sync="dialogVisible"
+      width="30%">
+      <!-- 树形控件 -->
+      <el-tree
+        :data="treeData"
+        show-checkbox
+        :default-checked-keys="[5]"
+        default-expand-all
+        :props="defaultProps">
+      </el-tree>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -87,7 +105,13 @@ export default {
   data() {
     return {
       list: [],
-      loading: true
+      loading: true,
+      dialogVisible: false,
+      treeData: [],
+      defaultProps: {
+        children: 'children',
+        label: 'authName'
+      }
     };
   },
   created() {
@@ -112,6 +136,16 @@ export default {
       if (status === 200) {
         this.$message.success(msg);
         role.children = data;
+      } else {
+        this.$message.error(msg);
+      }
+    },
+    async handleShowRoles() {
+      this.dialogVisible = true;
+      const res = await this.$http.get('rights/tree');
+      const {meta: {msg, status}, data} = res.data;
+      if (status === 200) {
+        this.treeData = data;
       } else {
         this.$message.error(msg);
       }
