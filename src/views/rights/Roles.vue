@@ -75,7 +75,7 @@
         <template slot-scope="scope">
           <el-button plain size="mini" type="primary" icon="el-icon-edit"></el-button>
           <el-button plain size="mini" type="danger" icon="el-icon-delete"></el-button>
-          <el-button plain size="mini" type="warning" icon="el-icon-check" @click="handleShowRoles"></el-button>
+          <el-button plain size="mini" type="warning" icon="el-icon-check" @click="handleShowRights(scope.row)"></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -88,7 +88,8 @@
       <el-tree
         :data="treeData"
         show-checkbox
-        :default-checked-keys="[5]"
+        node-key="id"
+        :default-checked-keys="checkedlist"
         default-expand-all
         :props="defaultProps">
       </el-tree>
@@ -111,7 +112,8 @@ export default {
       defaultProps: {
         children: 'children',
         label: 'authName'
-      }
+      },
+      checkedlist: []
     };
   },
   created() {
@@ -140,7 +142,8 @@ export default {
         this.$message.error(msg);
       }
     },
-    async handleShowRoles() {
+    // 显示分配角色权限的事件
+    async handleShowRights(role) {
       this.dialogVisible = true;
       const res = await this.$http.get('rights/tree');
       const {meta: {msg, status}, data} = res.data;
@@ -149,6 +152,21 @@ export default {
       } else {
         this.$message.error(msg);
       }
+      const array = [];
+      // 遍历一级权限
+      role.children.forEach((item1) => {
+        // array.push(item1.id);
+        // 遍历二级权限
+        item1.children.forEach((item2) => {
+          // array.push(item2.id);
+          // 遍历三级权限
+          item2.children.forEach((item3) => {
+            // 只需要将三级权限的id存在checkedlist中,树形控件会自动选中对应的二级和一级权限
+            array.push(item3.id);
+          });
+        });
+      });
+      this.checkedlist = array;
     }
   }
 };
