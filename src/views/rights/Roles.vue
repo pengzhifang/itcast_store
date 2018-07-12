@@ -286,7 +286,7 @@ export default {
         type: 'warning'
       }).then(async () => {
         const res = await this.$http.delete(`roles/${id}`);
-        const {meta: {msg, status}} = res.data;
+        const {meta: {status}} = res.data;
         if (status === 200) {
           this.loadData();
           this.$message({
@@ -298,7 +298,7 @@ export default {
         this.$message({
           type: 'info',
           message: '已取消删除'
-        });          
+        });
       });
     },
     // 编辑角色弹出框

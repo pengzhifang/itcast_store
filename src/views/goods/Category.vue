@@ -13,11 +13,20 @@
     border
       :data="list"
       style="width: 100%">
-      <el-table-column
+      <el-tree-grid
+      prop="cat_name"
+      label="分类名称"
+      treeKey="cat_id"
+      parentKey="cat_pid"
+      levelKey="cat_level"
+      childKey="children"
+      :indentSize="30">
+      </el-tree-grid>
+      <!-- <el-table-column
         prop="cat_name"
         label="分类名称"
         width="180">
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column
         label="级别"
         width="300">
@@ -53,14 +62,20 @@
 </template>
 
 <script>
+// 引入element-tree-grid组件
+import ElTreeGrid from 'element-tree-grid';
 export default {
   data() {
     return {
       list: [],
       pagenum: 1,
-      pagesize: 10,
+      pagesize: 5,
       total: 0
-    }
+    };
+  },
+  // 注册组件
+  components: {
+    ElTreeGrid
   },
   created() {
     this.loadData();
@@ -78,9 +93,9 @@ export default {
     },
     async loadData() {
       const res = await this.$http.get(`categories?type=3&pagesize=${this.pagesize}&pagenum=${this.pagenum}`);
-      // console.log(res);
+      console.log(res);
       const { data: {result, total} } = res.data;
-      this.list = result; 
+      this.list = result;
       this.total = total;
     }
   }
