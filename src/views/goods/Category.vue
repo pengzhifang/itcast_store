@@ -5,7 +5,7 @@
     <!-- 添加分类按钮 -->
     <el-row class="btn">
       <el-col :span="24">
-        <el-button type="success" plain>添加分类</el-button>
+        <el-button type="success" plain @click="handleAdd">添加分类</el-button>
       </el-col>
     </el-row>
     <!-- 表格 -->
@@ -43,7 +43,7 @@
       </el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
-          <el-button plain size="mini" type="primary" icon="el-icon-edit"></el-button>
+          <el-button plain size="mini" type="primary" icon="el-icon-edit" @click="handleEdit(scope.row)"></el-button>
           <el-button plain size="mini" type="danger" icon="el-icon-delete"></el-button>
         </template>
       </el-table-column>
@@ -58,6 +58,45 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="total">
     </el-pagination>
+    <!-- 添加分类弹出框 -->
+    <el-dialog
+      title="添加分类"
+      :visible.sync="dialogVisible"
+      width="30%">
+      <el-form ref="form" :model="form" label-width="80px">
+        <el-form-item label="分类名称">
+          <el-input v-model="form.cat_name"></el-input>
+        </el-form-item>
+        <el-form-item label="所属分类">
+          <el-cascader
+            :options="levelData"
+            change-on-select
+            expand-trigger="hover"
+            clearable
+            v-model="selectedOptions">
+          </el-cascader>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
+    <!-- 编辑分类弹出框 -->
+    <el-dialog
+      title="编辑商品分类"
+      :visible.sync="editDialogVisible"
+      width="30%">
+      <el-form ref="form" :model="form" label-width="80px">
+        <el-form-item label="分类名称">
+          <el-input v-model="form.cat_name"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="sureEdit">确 定</el-button>
+      </span>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -70,9 +109,18 @@ export default {
       list: [],
       pagenum: 1,
       pagesize: 5,
-      total: 0
+      total: 0,
+      dialogVisible: false,
+      editDialogVisible: false,
+      currentCatId: -1,
+      form: {
+        cat_name: ''
+      },
+      levelData: [],
+      selectedOptions: []
     };
   },
+  props: this.levelData,
   // 注册组件
   components: {
     ElTreeGrid
@@ -93,10 +141,38 @@ export default {
     },
     async loadData() {
       const res = await this.$http.get(`categories?type=3&pagesize=${this.pagesize}&pagenum=${this.pagenum}`);
-      console.log(res);
+      // console.log(res);
       const { data: {result, total} } = res.data;
       this.list = result;
       this.total = total;
+    },
+    // 添加分类
+    async handleAdd() {
+      this.dialogVisible = true;
+      const res = await this.$http('categories?type=3');
+      // console.log(res);
+      const {data} = res.data;
+      this.levelData = data;
+    },
+    // 编辑分类
+    async handleEdit(category) {
+      this.currentCatId = category.cat_id;
+      this.editDialogVisible = true;
+      console.log(category);
+      this.form.cat_name = category.cat_name;
+    },
+    // 编辑提交事件
+    async sureEdit() {
+      this.editDialogVisible = false;
+      const res = await this.$http.put(`categories/${this.currentCatId}`, this.form);
+      // console.log(res);
+      const {meta: {msg, status}, data} = res.data;
+      if (status === 200) {
+        this.loadData();
+        this.$message.success(msg);
+      } else {
+        this.$message.error(msg);
+      }
     }
   }
 };
