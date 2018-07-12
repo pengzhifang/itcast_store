@@ -5,7 +5,7 @@
     <!-- 添加角色 -->
     <el-row>
       <el-col :span="24">
-        <el-button class="btn">添加角色</el-button>
+        <el-button class="btn" @click="addRolesVisible = true">添加角色</el-button>
       </el-col>
     </el-row>
     <!-- 表格 -->
@@ -74,7 +74,7 @@
         label="操作">
         <template slot-scope="scope">
           <el-button plain size="mini" type="primary" icon="el-icon-edit"></el-button>
-          <el-button plain size="mini" type="danger" icon="el-icon-delete"></el-button>
+          <el-button plain size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.row.id)"></el-button>
           <el-button plain size="mini" type="warning" icon="el-icon-check" @click="handleShowRights(scope.row)"></el-button>
         </template>
       </el-table-column>
@@ -99,6 +99,30 @@
         <el-button type="primary" @click="handleSetRights">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 添加角色弹出框 -->
+    <el-dialog
+      title="添加角色"
+      :visible.sync="addRolesVisible"
+      width="30%"
+      @closed="handleCloseDialog">
+      <el-form
+        :model="form"
+        :rules="formRules"
+        ref="ruleForm"
+        label-width="100px"
+        class="demo-ruleForm">
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="form.roleName"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述" prop="roleDesc">
+          <el-input v-model="form.roleDesc"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addRolesVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleAdd">确 定</el-button>
+      </span>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -109,13 +133,27 @@ export default {
       list: [],
       loading: true,
       dialogVisible: false,
+      addRolesVisible: false,
       treeData: [],
       defaultProps: {
         children: 'children',
         label: 'authName'
       },
       checkedlist: [],
-      currentRoleId: -1
+      currentRoleId: -1,
+      // 添加角色所需数据
+      form: {
+        roleName: '',
+        roleDesc: ''
+      },
+      formRules: {
+        roleName: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' }
+        ],
+        roleDesc: [
+          { required: true, message: '请输入角色描述', trigger: 'blur' }
+        ]
+      }
     };
   },
   created() {
@@ -190,6 +228,53 @@ export default {
       } else {
         this.$message.error(msg);
       }
+    },
+    // 添加角色事件
+    async handleAdd() {
+      this.$refs.ruleForm.validate(async (valid) => {
+        if (!valid) {
+          return this.$message.error('请输入完整数据');
+        } else {
+          this.addRolesVisible = false;
+          const res = await this.$http.post('roles', this.form);
+          const {meta: {msg, status}} = res.data;
+          if (status === 201) {
+            this.$message.success(msg);
+            this.loadData();
+          } else {
+            this.$message.error(msg);
+          }
+        }
+      });
+    },
+    // 关闭弹出框事件-清空输入框
+    handleCloseDialog() {
+      for (let key in this.form) {
+        this.form[key] = '';
+      }
+    },
+    // 删除角色
+    async handleDelete(id) {
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$http.delete(`roles/${id}`);
+        const {meta: {msg, status}} = res.data;
+        if (status === 200) {
+          this.loadData();
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });          
+      });
     }
   }
 };
