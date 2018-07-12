@@ -73,7 +73,7 @@
       <el-table-column
         label="操作">
         <template slot-scope="scope">
-          <el-button plain size="mini" type="primary" icon="el-icon-edit"></el-button>
+          <el-button plain size="mini" type="primary" icon="el-icon-edit" @click="handleEdit(scope.row.id)"></el-button>
           <el-button plain size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.row.id)"></el-button>
           <el-button plain size="mini" type="warning" icon="el-icon-check" @click="handleShowRights(scope.row)"></el-button>
         </template>
@@ -123,6 +123,30 @@
         <el-button type="primary" @click="handleAdd">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 编辑角色弹出框 -->
+    <el-dialog
+      title="编辑角色"
+      :visible.sync="editRolesVisible"
+      width="30%"
+      @closed="handleCloseDialog">
+      <el-form
+        :model="form"
+        :rules="formRules"
+        ref="ruleForm"
+        label-width="100px"
+        class="demo-ruleForm">
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="form.roleName"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述" prop="roleDesc">
+          <el-input v-model="form.roleDesc"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editRolesVisible = false">取 消</el-button>
+        <el-button type="primary" @click="sureEdit">确 定</el-button>
+      </span>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -134,6 +158,7 @@ export default {
       loading: true,
       dialogVisible: false,
       addRolesVisible: false,
+      editRolesVisible: false,
       treeData: [],
       defaultProps: {
         children: 'children',
@@ -275,6 +300,26 @@ export default {
           message: '已取消删除'
         });          
       });
+    },
+    // 编辑角色弹出框
+    async handleEdit(id) {
+      this.currentRoleId = id;
+      this.editRolesVisible = true;
+      const res = await this.$http(`roles/${id}`);
+      const {data} = res.data;
+      this.form = data;
+    },
+    // 确定编辑事件
+    async sureEdit() {
+      this.editRolesVisible = false;
+      const res = await this.$http.put(`roles/${this.currentRoleId}`, this.form);
+      const {meta: {msg, status}} = res.data;
+      if (status === 200) {
+        this.loadData();
+        this.$message.success('编辑角色成功');
+      } else {
+        this.$message.error(msg);
+      }
     }
   }
 };
