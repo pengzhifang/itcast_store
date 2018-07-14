@@ -185,7 +185,7 @@ export default {
     async handleEdit(category) {
       this.currentCatId = category.cat_id;
       this.editDialogVisible = true;
-      console.log(category);
+      // console.log(category);
       this.form.cat_name = category.cat_name;
     },
     // 编辑提交事件
