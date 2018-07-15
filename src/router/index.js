@@ -11,6 +11,8 @@ import AddList from '@/views/goods/AddList.vue';
 import Order from '@/views/orders/Orders';
 import Report from '@/views/reports/Reports';
 import { Message } from 'element-ui';
+import 'nprogress/nprogress.css';
+import NProgress from 'nprogress';
 
 Vue.use(Router);
 
@@ -41,6 +43,7 @@ const router = new Router({
 
 // 路由前置守卫
 router.beforeEach((to, from, next) => {
+  NProgress.start();
   // console.log(to, from);
   // 判断当前路由是否是login,如果是,直接next()
   if (to.name === 'login') {
@@ -57,5 +60,10 @@ router.beforeEach((to, from, next) => {
     }
   }
 });
+
+//路由后置守卫
+router.afterEach((to, from) => {
+  NProgress.done();
+})
 
 export default router;
