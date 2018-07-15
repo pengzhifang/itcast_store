@@ -2,6 +2,9 @@
   <el-card class="box-card">
     <!-- 面包屑 -->
     <my-breadcrumb level1="订单管理" level2="订单列表" class="bread"></my-breadcrumb>
+    <!-- 地图容器 -->
+    <el-button @click="handleMove">点击添加地图标注</el-button>
+    <div id="mapContainer"></div>
     <!-- 省市区三级联动 -->
     <el-row class="test">
       <el-col :span="24">
@@ -72,22 +75,37 @@
 
 <script>
 import { regionData } from 'element-china-area-data';
+const { BMap } = window;
 export default {
   data() {
     return {
       list: [],
       options: regionData,
-      selectedOptions: []
+      selectedOptions: [],
+      map: null
     };
   },
   created() {
     this.loadData();
+  },
+  mounted() {
+    this.map = new BMap.Map('mapContainer');
+    const point = new BMap.Point(116.404, 39.915);
+    this.map.centerAndZoom(point, 15);
+    this.map.enableScrollWheelZoom(true);
   },
   methods: {
     async loadData() {
       const res = await this.$http.get('orders?pagenum=1&pagesize=5');
       // console.log(res);
       this.list = res.data.data.goods;
+    },
+    handleMove() {
+      const {map} = this;
+      var point = new BMap.Point(116.404, 39.915);
+      map.centerAndZoom(point, 15);
+      var marker = new BMap.Marker(point);
+      map.addOverlay(marker);
     }
   }
 };
@@ -99,5 +117,9 @@ export default {
 }
 .test {
   margin-top: 20px;
+}
+#mapContainer {
+  width: 1500px;
+  height: 300px;
 }
 </style>
