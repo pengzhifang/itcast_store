@@ -74,6 +74,7 @@
             change-on-select
             expand-trigger="hover"
             clearable
+            placeholder="默认添加一级分类"
             v-model="selectedOptions"
             :props="{
               label: 'cat_name',
@@ -164,9 +165,14 @@ export default {
     // 点击确定添加事件
     async sureAdd() {
       this.dialogVisible = false;
+      // 如果没有选择父级分类,则默认添加一级分类
+      let catPid = 0;
+      if (this.selectedOptions[0]) {
+        catPid = this.selectedOptions[this.selectedOptions.length - 1];
+      }
       const formData = {
         ...this.form,
-        cat_pid: this.selectedOptions[this.selectedOptions.length - 1],
+        cat_pid: catPid,
         cat_level: this.selectedOptions.length
       };
       const res = await this.$http.post('categories', formData);

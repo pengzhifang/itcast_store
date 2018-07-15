@@ -83,7 +83,8 @@
       </el-tab-pane>
       <el-tab-pane label="商品内容" name="4">
         <!-- 富文本编辑器-->
-        <quill-editor v-model="goodsForm.goods_introduce"
+        <quill-editor
+        v-model="goodsForm.goods_introduce"
           ref="myQuillEditor"
           class="Editor">
         </quill-editor>
